@@ -1,0 +1,10 @@
+{
+  "name": "hydra-bot",
+  "version": "1.0.0",
+  "main": "hydra_bot_mainnet.js",
+  "dependencies": {
+    "ethers": "^6.13.0",
+    "express": "^4.19.2",
+    "telegraf": "^4.16.3"
+  }
+}
