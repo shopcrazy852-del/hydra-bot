@@ -1,0 +1,19 @@
+{
+  "name": "hydra-protocol",
+  "version": "1.0.0",
+  "main": "deploy_base_mainnet.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "ethers": "^6.13.0",
+    "express": "^5.2.1",
+    "hardhat": "^2.22.18"
+  }
+}
