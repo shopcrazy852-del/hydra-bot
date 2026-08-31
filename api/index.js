@@ -6,7 +6,6 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const FOUNDER_WALLET = "0xD7AbCb1e2424A3dcB54409E77c8E0ADB666C6198";
 const RPC_URL = "https://mainnet.base.org";
 
-// سر التشفير الرئيسي المعزول (Master Secret) + الملح الثابت لمنع التعارض
 const MASTER_SECRET = process.env.WALLET_MASTER_SECRET || "HYDRA_PROTOCOL_V7_ENTERPRISE_KMS_SECRET_2026";
 const STATIC_SALT = "HYDRA_BASE_MAINNET_CHAINID_8453";
 
@@ -17,6 +16,8 @@ const CONTRACTS = {
   hook: "0x9dA529BCA5e288935b62F80925ee0311FFA67472",
   migrator: "0x32D8808c0869d85B84Ca76c57812c87c2a7A3274"
 };
+
+const DEXSCREENER_URL = `https://dexscreener.com/base/${CONTRACTS.token}`;
 
 const TOKEN_ABI = [
   "function balanceOf(address) view returns (uint256)",
@@ -37,7 +38,6 @@ const provider = new ethers.JsonRpcProvider(RPC_URL);
 const curveContract = new ethers.Contract(CONTRACTS.curve, CURVE_ABI, provider);
 const tokenContract = new ethers.Contract(CONTRACTS.token, TOKEN_ABI, provider);
 
-// 🛡️ اشتقاق آمن عالي التشفير بمعيار HMAC-SHA256 معزول عن توكن البوت
 function getUserWallet(userId) {
   const hmac = crypto.createHmac("sha256", MASTER_SECRET);
   hmac.update(`${STATIC_SALT}:${userId}`);
@@ -116,6 +116,9 @@ ${stats.isGraduated ? "🎓 <b>Status:</b> 🚀 GRADUATED TO UNISWAP v4!" : "�
     [
       Markup.button.callback("🔴 Sell 100%", "sell_100"),
       Markup.button.callback("👥 My Referral Link", "my_referral")
+    ],
+    [
+      Markup.button.url("📊 Live DexScreener Chart", DEXSCREENER_URL)
     ],
     [
       Markup.button.callback("🔄 Refresh", "refresh_dashboard"),
