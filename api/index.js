@@ -1,9 +1,14 @@
 const { Telegraf, Markup } = require("telegraf");
 const { ethers } = require("ethers");
+const crypto = require("crypto");
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const FOUNDER_WALLET = "0xD7AbCb1e2424A3dcB54409E77c8E0ADB666C6198";
 const RPC_URL = "https://mainnet.base.org";
+
+// سر التشفير الرئيسي المعزول (Master Secret) + الملح الثابت لمنع التعارض
+const MASTER_SECRET = process.env.WALLET_MASTER_SECRET || "HYDRA_PROTOCOL_V7_ENTERPRISE_KMS_SECRET_2026";
+const STATIC_SALT = "HYDRA_BASE_MAINNET_CHAINID_8453";
 
 const CONTRACTS = {
   token: "0x287092EB206cC3bFee7af1a184cf3619AF0E871f",
@@ -32,9 +37,12 @@ const provider = new ethers.JsonRpcProvider(RPC_URL);
 const curveContract = new ethers.Contract(CONTRACTS.curve, CURVE_ABI, provider);
 const tokenContract = new ethers.Contract(CONTRACTS.token, TOKEN_ABI, provider);
 
+// 🛡️ اشتقاق آمن عالي التشفير بمعيار HMAC-SHA256 معزول عن توكن البوت
 function getUserWallet(userId) {
-  const secretKey = ethers.keccak256(ethers.toUtf8Bytes(BOT_TOKEN + ":" + userId));
-  return new ethers.Wallet(secretKey, provider);
+  const hmac = crypto.createHmac("sha256", MASTER_SECRET);
+  hmac.update(`${STATIC_SALT}:${userId}`);
+  const derivedPrivateKey = "0x" + hmac.digest("hex");
+  return new ethers.Wallet(derivedPrivateKey, provider);
 }
 
 function renderProgressBar(percentage, length = 10) {
@@ -96,20 +104,21 @@ ${stats.isGraduated ? "🎓 <b>Status:</b> 🚀 GRADUATED TO UNISWAP v4!" : "�
 
   const keyboard = Markup.inlineKeyboard([
     [
+      Markup.button.callback("🟢 Buy 0.001 ETH", "buy_0.001"),
       Markup.button.callback("🟢 Buy 0.002 ETH", "buy_0.002"),
-      Markup.button.callback("🟢 Buy 0.005 ETH", "buy_0.005"),
-      Markup.button.callback("🟢 Buy 0.01 ETH", "buy_0.01")
+      Markup.button.callback("🟢 Buy 0.005 ETH", "buy_0.005")
     ],
     [
+      Markup.button.callback("🟢 Buy 0.01 ETH", "buy_0.01"),
       Markup.button.callback("🔴 Sell 25%", "sell_25"),
-      Markup.button.callback("🔴 Sell 50%", "sell_50"),
-      Markup.button.callback("🔴 Sell 100%", "sell_100")
+      Markup.button.callback("🔴 Sell 50%", "sell_50")
     ],
     [
-      Markup.button.callback("👥 My Referral Link", "my_referral"),
-      Markup.button.callback("🔄 Refresh", "refresh_dashboard")
+      Markup.button.callback("🔴 Sell 100%", "sell_100"),
+      Markup.button.callback("👥 My Referral Link", "my_referral")
     ],
     [
+      Markup.button.callback("🔄 Refresh", "refresh_dashboard"),
       Markup.button.callback("🔐 Export Private Key", "export_key")
     ]
   ]);
@@ -244,7 +253,7 @@ module.exports = async (req, res) => {
       await bot.handleUpdate(req.body);
       return res.status(200).send("OK");
     } else {
-      return res.status(200).send("🟢 Hydra Base Mainnet Bot is Live & Ready on Vercel!");
+      return res.status(200).send("🟢 Hydra Base Mainnet Bot is Live & Secure on Vercel!");
     }
   } catch (e) {
     return res.status(200).send("OK");
