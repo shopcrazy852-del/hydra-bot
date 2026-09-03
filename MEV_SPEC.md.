@@ -1,0 +1,22 @@
+# Hydra Protocol v7.0 - Arbitrage & MEV Integration Spec
+
+## 1. On-Chain Contracts (Base Mainnet - ChainID 8453)
+- **HydraToken**: `0x287092EB206cC3bFee7af1a184cf3619AF0E871f`
+- **HydraBondingCurve**: `0x32c3d28eE73e693d4281Ad27015d7a5A8Aa103A2`
+
+## 2. Mathematical Pricing Constants
+- Linear slope $k = \frac{25}{8 \times 10^{34}}$
+- Max Curve Capacity: $S_{max} = 800,000,000 \times 10^{18}$ HYDRA (Target: 100 ETH).
+
+## 3. Off-Chain / Local Simulation Formula
+Searchers can calculate exact token output $\Delta S$ for net ETH input $E_{net}$ without state revert:
+$$\Delta S = \sqrt{S^2 + \frac{E_{net} \cdot 16 \times 10^{34}}{25}} - S$$
+
+For Selling $\Delta S$ tokens back to the Curve:
+$$E_{gross} = \frac{(2S - \Delta S) \cdot \Delta S \cdot 25}{16 \times 10^{34}}$$
+*Exit fee: 2.0% deducted and routed to HydraYieldVault.*
+
+## 4. Flash Loan & Direct Execution
+- Function: `buy(uint256 minTokensOut, address referrer) external payable returns (uint256)`
+- Function: `sell(uint256 tokenAmount, uint256 minEthOut) external returns (uint256)`
+- **Slippage Protection**: Pass `minTokensOut` or `minEthOut` to prevent frontrunning.
